@@ -1,0 +1,88 @@
+package com.JobPortal.Service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.JobPortal.Custome_Exception.ResourceNotFoundException;
+import com.JobPortal.Repository.CompanyRepository;
+import com.JobPortal.Repository.JobRepository;
+import com.JobPortal.entities.Company;
+import com.JobPortal.entities.Industry;
+import com.JobPortal.entities.Job;
+import com.JobPortal.entities.JobType;
+import com.JobPortal.entities.Status;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class JobService {
+
+	private final JobRepository jobRepository;
+	private final CompanyRepository companyRepository;
+
+	// Method 1 : Add a Job for a Company
+	public Job addJob(Long companyId, Job j) {
+		
+		// Method 1 : Add a Job for a Company
+		Company c = companyRepository.findById(companyId)
+				
+				// If company doesn't exist, throw exception
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid company id"));
+
+		// Set company inside Job object
+		j.setCompany(c);
+		
+		// Save Job into database
+		return jobRepository.save(j);
+	}
+
+	
+	 // Method 2 : Get all Jobs by Location
+	public List<Job> getByLocation(String location) {
+		 // Fetch jobs having the given location
+		return jobRepository.findByLocation(location);
+	}
+
+	
+	// Method 3 : Delete Job using JobType and Company Name
+	public String deleteByJobAndComapnyName(JobType jobtype, String name) {
+		// Check whether company exists//// Throw exception if company not found
+		companyRepository.findByName(name).orElseThrow(() -> new ResourceNotFoundException("Invalid name "));
+		
+		// Delete matching jobs
+		jobRepository.deleteByJobTypeAndCompanyName(jobtype, name);
+		return "job deleted sucessfully";
+	}
+	
+	
+	  // Method 4 : Update Salary using Company ID and Job Title
+	public Job updateByCompanyIdAndTitle(Long id,String title,double salary) {
+		
+		// Find job by company id and title//// Throw exception if job doesn't exist
+		Job job= jobRepository.findByCompanyIdAndTitle(id, title).orElseThrow(()-> new ResourceNotFoundException("Invalid id and title"));
+		
+		// Update salary
+		job.setSalary(salary);
+		return job;
+	}
+	
+	
+	
+	//Method 5 : Find Jobs by Industry and Minimum Salary
+	public List<Job> getByIndustryAndSalaryGreater(Industry industry,double minSalary) {
+		return jobRepository.findByCompanyIndustryAndSalaryGreaterThanEqual(industry, minSalary);
+	}
+	
+	
+	// Method 6 : Update Job Status
+    // Company Name + Job Title
+	public Job updateByCompanyNameAndTitle(String companyName,String title) {
+		Job job=jobRepository.findByCompanyNameAndTitle(companyName, title).orElseThrow(()->new ResourceNotFoundException("Invalid name"));
+		job.setStatus(Status.UNAVAILABLE);
+		return job;
+	}
+}
