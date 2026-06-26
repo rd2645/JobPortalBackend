@@ -1,0 +1,57 @@
+package com.JobPortal.Controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.JobPortal.Service.JobService;
+import com.JobPortal.entities.Industry;
+import com.JobPortal.entities.Job;
+import com.JobPortal.entities.JobType;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/job")
+@RequiredArgsConstructor
+public class JobController {
+
+	private final JobService jobService;
+
+	@PostMapping("/{companyId}")
+	public ResponseEntity<?> addJob(@PathVariable Long companyId, @RequestBody Job j) {
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(jobService.addJob(companyId, j));
+	}
+
+	@GetMapping("/location/{location}")
+	public ResponseEntity<?> byLocation(@PathVariable String location) {
+
+		return ResponseEntity.ok(jobService.getByLocation(location));
+	}
+
+	@DeleteMapping
+	public ResponseEntity<?> byJobAndCompanyName(@RequestParam JobType jobType, @RequestParam String name) {
+
+		return ResponseEntity.ok(jobService.deleteByJobAndComapnyName(jobType, name));
+	}
+
+	@PutMapping("/salary")
+	public ResponseEntity<?> byCompanyIdAndTitle(@RequestParam Long id, @RequestParam String title,
+			@RequestParam double salary) {
+
+		return ResponseEntity.ok(jobService.updateByCompanyIdAndTitle(id, title, salary));
+	}
+	
+	@GetMapping("/industry")
+	public ResponseEntity<?>ByIndustryAndMinsalary(@RequestParam Industry industry,@RequestParam double salary){
+		return ResponseEntity.ok(jobService.getByIndustryAndSalaryGreater(industry, salary));
+	}
+	
+	@PutMapping("/status/unavailable")
+	public ResponseEntity<?>byCompanyNameAndtitle(@RequestParam String companyName,@RequestParam String title){
+		return ResponseEntity.ok(jobService.updateByCompanyNameAndTitle(companyName, title));
+	}
+	
+	
+}
